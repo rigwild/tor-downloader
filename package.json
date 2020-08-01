@@ -1,0 +1,50 @@
+{
+  "name": "tor-downloader",
+  "version": "0.1.0",
+  "description": "📥 Easily download the Tor expert bundle (tor.exe) with GPG signature check",
+  "license": "MIT",
+  "repository": "rigwild/tor-downloader",
+  "author": {
+    "name": "rigwild",
+    "email": "me@rigwild.dev",
+    "url": "https://rigwild.dev"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "engines": {
+    "node": ">=10"
+  },
+  "scripts": {
+    "clean": "rm -rf tor*",
+    "build": "tsc",
+    "prepublishOnly": "tsc",
+    "test": "ava --verbose"
+  },
+  "files": [
+    "dist"
+  ],
+  "keywords": [],
+  "dependencies": {
+    "extract-zip": "^2.0.1",
+    "node-fetch": "^2.6.0",
+    "openpgp": "^4.10.7"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "^2.5.7",
+    "@types/openpgp": "^4.4.12",
+    "ava": "^3.11.0",
+    "execa": "^4.0.3",
+    "simple-proxy-agent": "^1.0.8",
+    "ts-node": "^8.10.2",
+    "typescript": "^3.9.7"
+  },
+  "ava": {
+    "extensions": [
+      "ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "timeout": "60000"
+  }
+}
