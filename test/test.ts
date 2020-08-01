@@ -10,7 +10,7 @@ const ProxyAgent = require('simple-proxy-agent')
 import { downloadTor, TorDownloaderReturnType } from '../index'
 
 const outputPath = path.resolve(__dirname, 'tor-test')
-const clearTorDir = () => fs.promises.rmdir(outputPath, { recursive: true })
+const clearTorDir = () => fs.promises.rmdir(outputPath, { recursive: true }).catch(() => {})
 
 test.before(clearTorDir)
 
@@ -37,8 +37,8 @@ test.serial('Check modified Tor zip is re-downloaded after a failed signature ch
   // Just to get the Tor zip path
   const _torPaths = await downloadTor({ outputPath })
 
-  // Add a byte at the end of the Tor zip to change its signature
-  await execa('sh', ['-c', `echo 0 >> ${_torPaths.zipPath}`])
+  // Clear the Tor zip file to change its signature
+  await fs.promises.writeFile(_torPaths.zipPath, 'hello', { encoding: 'utf8' })
 
   const torPaths = await downloadTor({ outputPath })
 
@@ -47,12 +47,12 @@ test.serial('Check modified Tor zip is re-downloaded after a failed signature ch
   checkTorPaths(t, torPaths)
 })
 
-test.serial.only('Try running Tor as a SOCKS5 proxy', async t => {
+test.serial('Try running Tor as a SOCKS5 proxy', async t => {
   // Just to get the Tor binary path
   const { binaryPath: tor } = await downloadTor({ outputPath })
 
   // Run Tor and wait 10 seconds to let it connect to the Tor network
-  ;(execa(tor, ['--quiet'], { timeout: 60_000 }) as any).stdout.pipe(process.stdout)
+  const torInstance = execa(tor, ['--quiet'], { timeout: 60_000 })
   await new Promise(res => setTimeout(res, 10000))
 
   const getPublicIp = async (useTor: boolean) =>
@@ -64,6 +64,7 @@ test.serial.only('Try running Tor as a SOCKS5 proxy', async t => {
   const ip = await getPublicIp(false)
   const ipTor = await getPublicIp(true)
 
+  torInstance.cancel()
   t.not(ip, ipTor)
 })
 
